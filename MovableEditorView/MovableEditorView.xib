@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="4510" systemVersion="12F45" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none">
+    <dependencies>
+        <deployment defaultVersion="1536" identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3742"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="m7O-MG-4X7" customClass="MovableEditorView">
+            <rect key="frame" x="0.0" y="0.0" width="234" height="40"/>
+            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="KkT-sp-zGi">
+                    <rect key="frame" x="78" y="5" width="30" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                    <state key="normal" backgroundImage="text_unselected.png">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="textPressed:" destination="m7O-MG-4X7" eventType="touchUpInside" id="4Mz-as-2nL"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="2sE-Lm-odf">
+                    <rect key="frame" x="116" y="5" width="30" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                    <state key="normal" backgroundImage="record.png">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="audioPressed:" destination="m7O-MG-4X7" eventType="touchUpInside" id="EOR-76-qm2"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="02d-FM-5kQ">
+                    <rect key="frame" x="159" y="5" width="30" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                    <state key="normal" backgroundImage="color_picker.png">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="colorPickerPressed:" destination="m7O-MG-4X7" eventType="touchUpInside" id="x0i-oz-Gm8"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="uAV-fA-boW">
+                    <rect key="frame" x="197" y="5" width="30" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                    <state key="normal" backgroundImage="email_Unselected.png">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="emailPressed:" destination="m7O-MG-4X7" eventType="touchUpInside" id="taB-8F-dtX"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="VXM-iy-Vj9">
+                    <rect key="frame" x="40" y="5" width="30" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                    <state key="normal" backgroundImage="eraser_unselected.png">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="erasePressed:" destination="m7O-MG-4X7" eventType="touchUpInside" id="Amn-zF-2bz"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="cqN-dI-gDf">
+                    <rect key="frame" x="2" y="5" width="30" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                    <state key="normal" backgroundImage="scribble_unselected.png">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="scribblePressed:" destination="m7O-MG-4X7" eventType="touchUpInside" id="1Ze-WP-tF7"/>
+                    </connections>
+                </button>
+            </subviews>
+            <color key="backgroundColor" red="0.070588235294117646" green="0.45098039215686275" blue="0.43529411764705883" alpha="1" colorSpace="calibratedRGB"/>
+            <connections>
+                <outlet property="audioBtn" destination="2sE-Lm-odf" id="cMD-iA-Qge"/>
+                <outlet property="colorPickerBtn" destination="02d-FM-5kQ" id="kHI-si-z7H"/>
+                <outlet property="emailBtn" destination="uAV-fA-boW" id="bu4-a8-5Sp"/>
+                <outlet property="eraseBtn" destination="VXM-iy-Vj9" id="o9C-la-xNG"/>
+                <outlet property="scribbleBtn" destination="cqN-dI-gDf" id="VLD-hu-jfe"/>
+                <outlet property="textBtn" destination="KkT-sp-zGi" id="3uL-Ph-H7n"/>
+            </connections>
+        </view>
+    </objects>
+    <resources>
+        <image name="color_picker.png" width="30" height="30"/>
+        <image name="email_Unselected.png" width="30" height="30"/>
+        <image name="eraser_unselected.png" width="30" height="30"/>
+        <image name="record.png" width="30" height="30"/>
+        <image name="scribble_unselected.png" width="30" height="30"/>
+        <image name="text_unselected.png" width="30" height="30"/>
+    </resources>
+</document>
