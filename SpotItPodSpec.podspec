@@ -1,5 +1,5 @@
 #
-#  Be sure to run `pod spec lint SpotItPodSpec.podspec' to ensure this is a
+#  Be sure to run `pod spec lint SpotIt.podspec' to ensure this is a
 #  valid spec and to remove all comments including this before submitting the spec.
 #
 #  To learn more about Podspec attributes see http://docs.cocoapods.org/specification.html
@@ -15,12 +15,12 @@ Pod::Spec.new do |s|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  s.name         = "SpotItPodSpec"
+  s.name         = "SpotIt"
   s.version      = "0.0.1"
-  s.summary      = "Spot it allows testers to spot their correction in the screen and send the mail to developer"
+  s.summary      = "Spot it allows testers to spot their correction in the app and send the mail to developer"
 
   s.description  = <<-DESC
-                   A longer description of SpotItPodSpec in Markdown format.
+                   A longer description of SpotIt in Markdown format.
 
                    * Think: Why did you write this? What is the focus? What does it do?
                    * CocoaPods will be using this to generate tags, and improve search results.
@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
                    * Finally, don't worry about the indent, CocoaPods strips it!
                    DESC
 
-  s.homepage     = "https://github.com/jailanigithub/SpotItPodSpec"
+  s.homepage     = "https://github.com/jailanigithub/SpotIt"
   # s.screenshots  = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
 
 
@@ -75,7 +75,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/jailanigithub/SpotItPodSpec.git", :tag => "0.0.1" }
+  s.source       = { :git => "https://github.com/jailanigithub/SpotIt.git", :tag => "0.0.1" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
