@@ -277,7 +277,6 @@ NSString *const PLAY_IMAGE      = @"play.png";
 
         self.isRecordedAudioAvailable = NO;
         [self changeAudioButtonImageToStartRecodring];
-        [self setSelectedBtnId:self.previouslySelectedBtnId];
     }];
 }
 
@@ -292,7 +291,6 @@ NSString *const PLAY_IMAGE      = @"play.png";
 -(void)changeAudioButtonImageToStartRecodring
 {
     [self.audioBtn setBackgroundImage:[UIImage imageNamed:RECORD_IMAGE] forState:UIControlStateNormal];
-    [self setSelectedBtnId:self.previouslySelectedBtnId];
 }
 
 #pragma mark change audio button image to stop
@@ -377,7 +375,6 @@ NSString *const PLAY_IMAGE      = @"play.png";
 
 -(IBAction)audioPressed:(id)sender
 {
-    self.previouslySelectedBtnId = self.selectedBtnId;
     [self unSelectPreviouslySelectedBtn:AUDIO_BTN_ID];
     [self controlRecorderAndPlayer];
 }

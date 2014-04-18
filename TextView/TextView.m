@@ -37,6 +37,10 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
         //Initialization code
         [self setBackgroundColor:[UIColor clearColor]];
         [self addTapgestureRecognizerToBackgrndView];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleTextFieldChanged:)
+                                                     name:UITextFieldTextDidChangeNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -286,11 +290,10 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
 }
 
 #pragma mark text field delegate
-- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+-(void)handleTextFieldChanged:(NSNotification*)notification
 {
-//    NSLog(@"+++++%@+++++++%@", textField.text, string);
-    [self.accessoryLabel setText:(textField.text.length == 1) ? @"|" : [NSString stringWithFormat:@"%@%@|", textField.text, string]];
-    return YES;
+//    NSLog(@"+++Did text field change notification called %@+++", self.textField.text);
+   [self.accessoryLabel setText:[NSString stringWithFormat:@"%@|", self.textField.text]];
 }
 
 /*
