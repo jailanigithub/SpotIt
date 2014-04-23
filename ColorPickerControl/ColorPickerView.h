@@ -16,5 +16,6 @@
 @property (nonatomic,weak) IBOutlet UIView *pickedColor;
 
 -(UIColor*)getCurrentSelectedColor;
+-(void)hideDoneButton;
 
 @end

@@ -6,28 +6,31 @@
 //  Copyright (c) 2014 mani. All rights reserved.
 //
 
-#import "TextView.h"
+#import "MovableTextView.h"
+#import "UILabel+UILabelDynamicHeight.h"
+#import "CommonMacro.h"
+#import "SnapshotView.h"
 
-static const NSInteger kDeleteControlHeight = 30;
+static const NSInteger kDeleteControlHeight = 50;
 static const NSInteger kDeleteControlWidth  = 200;
 
-static const NSInteger kCommendLabelWidth     = 300;
+static const NSInteger kCommendLabelWidth     = 200;
 static const NSInteger kCommendlabelHeight    = 15;
-static const NSInteger kCommendlabelFontSize  = 12;
+static const NSInteger kCommendlabelFontSize  = 15;
 
-static const NSInteger kAccessoryLabelWidth     = 180;
 static const NSInteger kAccessoryLabelHeight    = 30;
 
-static const NSString* kDeleteControlTitle    = @"Remove X";
+static const NSString* kTrashIconImage    = @"trash_icon";
+static const NSString* kCursor            = @"|";
 
-@interface TextView()
+@interface MovableTextView()
 
 @property(nonatomic, strong) UITextField *textField;
 @property(nonatomic, strong) UILabel *deleteControl, *accessoryLabel;
 @property(nonatomic) CGPoint textFieldTouchPoint;
 @end
 
-@implementation TextView
+@implementation MovableTextView
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -36,6 +39,7 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
         
         //Initialization code
         [self setBackgroundColor:[UIColor clearColor]];
+        [self setUserInteractionEnabled:YES];
         [self addTapgestureRecognizerToBackgrndView];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleTextFieldChanged:)
@@ -62,10 +66,10 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
     [self resetAccessoryTextField];
 }
 
-#pragma mark reset accessory textfield
+#pragma mark reset accessory textfield(Label)
 -(void)resetAccessoryTextField
 {
-    [self.accessoryLabel setText:@"|"];
+    [self.accessoryLabel setText:(NSString*)kCursor];
     [self.textField setText:@""];
 }
 
@@ -98,11 +102,6 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
     [self.textField becomeFirstResponder];
 }
 
-- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
-{
-    return YES;
-}
-
 #pragma mark create textControl
 -(UITextField*)textField
 {
@@ -126,14 +125,35 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
 }
 
 #pragma mark accessory textfield
+
+-(CGRect)getFrame:(UIToolbar*)myToolbar forbarbutton:(UIBarButtonItem*)itemToExclude
+{
+    
+    CGFloat totalItemsWidth = 0.0;
+    for (UIBarButtonItem *barButtonItem in myToolbar.items) {
+        if (barButtonItem != itemToExclude)
+        {
+            // Get width of bar button item (hack from other SO question)
+            UIView *view = [barButtonItem valueForKey:@"view"];
+            CGFloat width = view ? [view frame].size.width : (CGFloat)0.0;
+            
+            totalItemsWidth += width;
+        }
+    }
+    
+    return CGRectMake(0, 5, (myToolbar.frame.size.width - totalItemsWidth), kAccessoryLabelHeight);
+}
+
 -(UILabel*)accessoryLabel
 {
     if(!_accessoryLabel)
     {
-        _accessoryLabel = [[UILabel alloc]initWithFrame:CGRectMake(50, 5, kAccessoryLabelWidth, kAccessoryLabelHeight)];
+        _accessoryLabel = [[UILabel alloc]init];
         [_accessoryLabel setBackgroundColor:[UIColor whiteColor]];
+        
+        [_accessoryLabel setLineBreakMode:NSLineBreakByTruncatingHead];
         [_accessoryLabel.layer setCornerRadius:4.0];
-        [_accessoryLabel setText:@"|"];
+        [_accessoryLabel setText:(NSString*)kCursor];
     }
     return _accessoryLabel;
 }
@@ -151,8 +171,35 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
     [label addGestureRecognizer:panGesture];
 }
 
+-(BOOL)isInsideOfFrame:(UIPanGestureRecognizer*)gesture
+{
+    CGPoint translation = [gesture translationInView:self];
+    
+    if(gesture.view.frame.origin.x + translation.x <= 0)
+        return NO;
+
+    if(gesture.view.frame.origin.y + translation.y <= 0)
+        return NO;
+
+    if(gesture.view.frame.origin.x + gesture.view.frame.size.width + translation.x >= self.frame.size.width)
+        return NO;
+    
+    if(gesture.view.frame.origin.y + gesture.view.frame.size.height + translation.y >= self.frame.size.height)
+        return NO;
+    
+    return YES;
+}
+
 -(void)panning:(UIPanGestureRecognizer*)gesture
 {
+    if (![self isInsideOfFrame:gesture])
+    {
+        if(CGRectIntersectsRect(self.deleteControl.frame, gesture.view.frame))
+            [gesture.view removeFromSuperview];
+        [self removeDeleteControlFromSuperView];
+        return;
+    }
+    
     CGPoint translation = [gesture translationInView:self];
     gesture.view.center = CGPointMake(gesture.view.center.x + translation.x,
                                       gesture.view.center.y + translation.y);
@@ -164,22 +211,10 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
         [self addTextFieldDeleteTool];
         [self removeFirstResponders];
     }
-    else if (gesture.state == UIGestureRecognizerStateChanged)
-    {
-        //        NSLog(@"Panning continuous");
-    }
     else if (gesture.state == UIGestureRecognizerStateEnded)
     {
-        NSLog(@"Panning ended");
         if(CGRectIntersectsRect(self.deleteControl.frame, gesture.view.frame))
-        {
-            NSLog(@"Command label Intersects delete control");
             [gesture.view removeFromSuperview];
-        }
-        else
-        {
-            NSLog(@"Command label doesn't intersects delete control");
-        }
         [self removeDeleteControlFromSuperView];
     }
 }
@@ -189,7 +224,16 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
 {
     UIToolbar *keyboardToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
     keyboardToolbar.barStyle = UIBarStyleBlackTranslucent;
-    keyboardToolbar.tintColor = [UIColor darkGrayColor];
+
+    
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    {
+        [keyboardToolbar setBarTintColor:[UIColor darkGrayColor]];
+    }
+    else
+    {
+        [keyboardToolbar setTintColor:[UIColor darkGrayColor]];
+    }
     
     UIBarButtonItem* previousButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(textFieldCancelled:)];
     [previousButton setTintColor:[UIColor blackColor]];
@@ -198,8 +242,10 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
     [doneButton setTintColor:[UIColor blackColor]];
     
     UIBarButtonItem *textFieldItem = [[UIBarButtonItem alloc] initWithCustomView:self.accessoryLabel];
-                                      
+    
     [keyboardToolbar setItems:[NSArray arrayWithObjects: previousButton, textFieldItem, doneButton, nil] animated:NO];
+    
+    self.accessoryLabel.frame =  [self getFrame:keyboardToolbar forbarbutton:textFieldItem];
     
     [textField setInputAccessoryView:keyboardToolbar];
 }
@@ -217,21 +263,29 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
 }
 
 #pragma mark command label related function
+-(CGFloat)getCommandLabelWidth
+{
+    NSLog(@"Command label width %f", self.frame.size.width*75/100);
+    return self.frame.size.width*75/100;
+}
+
 -(void)addCommandLabel
 {
     if(!self.textField.text || [@"" isEqualToString:self.textField.text])
         return;
     
-    UILabel *commandLabel = [[UILabel alloc]initWithFrame:CGRectMake(self.textFieldTouchPoint.x, self.textFieldTouchPoint.y, kCommendLabelWidth, kCommendlabelHeight)];
+    UILabel *commandLabel = [[UILabel alloc]initWithFrame:CGRectMake(self.textFieldTouchPoint.x, self.textFieldTouchPoint.y, [self getCommandLabelWidth], kCommendlabelHeight)];
+
+    [commandLabel setUserInteractionEnabled:YES];
+    [commandLabel setText:self.textField.text];
+    [commandLabel adjustFrameSize];
     
     [self addTapGesture:commandLabel];
     [self addPanGestureRecognizer:commandLabel];
     [self setAttributeCommendlabel:commandLabel];
 
-    [commandLabel setUserInteractionEnabled:YES];
-    [commandLabel setText:self.textField.text];
-
     [self removetextFieldFromSuperView];
+    [commandLabel setCenter:CGPointMake(self.textFieldTouchPoint.x, self.textFieldTouchPoint.y)];
     [self addSubview:commandLabel];
 }
 
@@ -240,7 +294,7 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
     [label setFont: [UIFont systemFontOfSize:kCommendlabelFontSize]];
     [label setTextColor:(self.textColor) ? self.textColor : [UIColor redColor]];
     [label setBackgroundColor:[UIColor clearColor]];
-    [label setTextAlignment:NSTextAlignmentLeft];
+    [label setTextAlignment:NSTextAlignmentCenter];
 }
 
 -(void)resetCommandlabel
@@ -262,17 +316,23 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
 }
 
 #pragma mark create deleteControl
+
+-(CGFloat)getDeleteControlWidth
+{
+    return [SnapshotView sharedHandler].frame.size.width;
+}
+
 -(UILabel*)deleteControl
 {
     if(!_deleteControl)
     {
-        _deleteControl = [[UILabel alloc]initWithFrame:CGRectMake(self.frame.size.width/2 - (kDeleteControlWidth/2), self.frame.size.height - kDeleteControlHeight + 5, kDeleteControlWidth, kDeleteControlHeight)];
+        _deleteControl = [[UILabel alloc]initWithFrame:CGRectMake(self.frame.size.width/2 - [self getDeleteControlWidth]/2, self.frame.size.height - (kDeleteControlHeight*1.0),  [self getDeleteControlWidth], kDeleteControlHeight)];
         [_deleteControl.layer setCornerRadius:5.0];
         [_deleteControl setBackgroundColor:[UIColor redColor]];
-        [_deleteControl setAlpha:0.3];
-        [_deleteControl setTextColor:[UIColor whiteColor]];
-        [_deleteControl setTextAlignment:NSTextAlignmentCenter];
-        [_deleteControl setText:(NSString*)kDeleteControlTitle];
+        [_deleteControl setAlpha:0.6];
+         UIImageView *trashIcon = [[UIImageView alloc]initWithImage:[UIImage imageNamed:(NSString*)kTrashIconImage]];
+        [trashIcon setCenter:CGPointMake( _deleteControl.frame.size.width/2, _deleteControl.frame.size.height/2)];
+        [_deleteControl addSubview:trashIcon];
     }
     return _deleteControl;
 }
@@ -292,17 +352,7 @@ static const NSString* kDeleteControlTitle    = @"Remove X";
 #pragma mark text field delegate
 -(void)handleTextFieldChanged:(NSNotification*)notification
 {
-//    NSLog(@"+++Did text field change notification called %@+++", self.textField.text);
    [self.accessoryLabel setText:[NSString stringWithFormat:@"%@|", self.textField.text]];
 }
-
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
 
 @end

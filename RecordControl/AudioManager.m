@@ -8,6 +8,7 @@
 
 #import "AudioManager.h"
 #import "FileManager.h"
+#import "Constants.h"
 
 @interface AudioManager()
 {
@@ -16,6 +17,7 @@
 
 @end
 
+/*
 NSInteger const FORMAT_ID   = kAudioFormatMPEG4AAC;
 NSInteger const SAMPLE_RATE = 16000;
 NSInteger const BIT_RATE_KEY = 32000;//32,40,48,56,64,80,96,128,160,192,256,320
@@ -26,6 +28,7 @@ NSInteger const BIT_DEPTH_KEY       = 16;
 
 NSInteger const NUMBER_OF_CHANNEL   = 1;
 NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
+*/
 
 @interface AudioManager()
 
@@ -38,7 +41,6 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 @property(nonatomic, strong) NSTimer *playerTimer;
 @property(nonatomic, strong) NSTimer *pitchTimer;
 @property(nonatomic) BOOL isRecorderPaused, isPlayerPaused;
-
 
 @end
 
@@ -54,14 +56,15 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
     return sharedInstance;
 }
 
--(void)assignTempFileName:(NSString*)fileName{
+-(void)assignTempFileName:(NSString*)fileName
+{
     self.fileName = fileName;
 }
 
 #pragma amrk Recorder related functions
 #pragma mark getRecorderStatus
--(RecorderStatus)getRecorderStatus{
-    
+-(RecorderStatus)getRecorderStatus
+{
     if (self.recorder.isRecording)
         return RecorderStatusRecording;
     
@@ -71,17 +74,11 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
         return RecorderStatusIdle;
 }
 
--(NSMutableDictionary*)recordingParamsDicionary{
-    
-    if(!_recordingParamsDicionary){
-        
+-(NSMutableDictionary*)recordingParamsDicionary
+{
+    if(!_recordingParamsDicionary)
+    {
         _recordingParamsDicionary = [[NSMutableDictionary alloc]init];
-       
-        //UnCommand this to check the assigned encoding format
-        NSLog(@"FORMAT_ID %i", FORMAT_ID);
-        NSLog(@"kAudioFormatiLBC %i", kAudioFormatiLBC);
-        NSLog(@"kAudioFormatiAMR %i", kAudioFormatAMR);
-        NSLog(@"kAudioFormatMA4 %i", kAudioFormatAppleIMA4);
         
         [_recordingParamsDicionary setObject:[NSNumber numberWithInt:FORMAT_ID] forKey: AVFormatIDKey];
         [_recordingParamsDicionary setObject:[NSNumber numberWithInt:SAMPLE_RATE] forKey: AVSampleRateKey];
@@ -97,14 +94,10 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 
 -(AVAudioRecorder*)recorder{
     
-    if(!_recorder){
-        
+    if(!_recorder)
+    {
         self.fileName = (self.fileName) ? self.fileName : [[FileManager sharedFileManager] getAudioFilePath];
 
-        if(self.fileName)
-        {
-            NSLog(@"self.filename %@", self.fileName);
-        }
         NSError *recordingError = nil;
         _recorder = [[ AVAudioRecorder alloc] initWithURL:[NSURL fileURLWithPath:self.fileName] settings:self.recordingParamsDicionary error:&recordingError];
         _recorder.meteringEnabled = YES;
@@ -118,8 +111,8 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 }
 
 #pragma mark StartRecorder and timer
--(void)startRecorderAndTimer{
-    
+-(void)startRecorderAndTimer
+{
     self.recorder.meteringEnabled = YES;
     [self.recorder record];
     self.isRecorderPaused = NO;
@@ -127,29 +120,29 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 }
 
 #pragma mark StopRecorder and timer
--(void)stopRecorderAndInvalidateTimer{
-    
+-(void)stopRecorderAndInvalidateTimer
+{
     self.isRecorderPaused = NO;
     [self.recorder stop];
     [self invalidateRecorderAndTimer];
 }
 
 #pragma mark EnableRecordingPitchTimer
--(void)enableRecordingPitchTimer{
-    
+-(void)enableRecordingPitchTimer
+{
     self.pitchTimer = [NSTimer scheduledTimerWithTimeInterval: 0.1 target: self selector: @selector(pitchTimerCallBack:) userInfo: nil repeats: YES];
 }
 
 #pragma mark DisableRecorderAndPitchTimer
--(void)invalidateRecorderAndTimer{
-    
+-(void)invalidateRecorderAndTimer
+{
     self.recorder = nil;
     [self.pitchTimer invalidate];
 }
 
 #pragma mark Start Recording
--(RecordingStatus)startRecording:(NSString*)fileName{
-
+-(RecordingStatus)startRecording:(NSString*)fileName
+{
     if(![self.fileName isEqualToString:fileName])
     {
         self.fileName = fileName;
@@ -166,22 +159,25 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
         if(![self activateAudioSession])
             return RecordingFailedToStartAudioSession;
         
-        if ([self.recorder prepareToRecord] == YES){
+        if ([self.recorder prepareToRecord] == YES)
+        {
             [self startRecorderAndTimer];
+            [[FileManager sharedFileManager]rollbackTheRecordedAudios];
             return RecordingStarted;
         }
         else
         {
-            NSLog(@"Recorder not ready:");
+            NSLog(@"Error: Recorder not ready:");
             return RecordingFailedToStart;
         }
     }
 }
 
 #pragma mark Toggle recording
--(RecordingStatus)toggleRecording{
-    
-    if(self.recorder.recording){
+-(RecordingStatus)toggleRecording
+{
+    if(self.recorder.recording)
+    {
         [self pauseRecording];
         return RecordingPaused;
     }
@@ -193,8 +189,8 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 }
 
 #pragma mark PauseRecording
--(RecordingStatus)pauseRecording{
-    
+-(RecordingStatus)pauseRecording
+{
     [self.recorder pause];
     self.isRecorderPaused = YES;
     [self.pitchTimer invalidate];
@@ -202,15 +198,15 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 }
 
 #pragma mark resumeRecording
--(RecordingStatus)resumeRecording{
-    
+-(RecordingStatus)resumeRecording
+{
     [self startRecorderAndTimer];
     return RecordingResumed;
 }
 
 #pragma mark PauseRecording
--(RecordingStatus)stopRecording{
-    
+-(RecordingStatus)stopRecording
+{
     RecorderStatus recorderStatus = [self getRecorderStatus];
 
     if(recorderStatus == RecorderStatusPaused || recorderStatus == RecorderStatusRecording)
@@ -221,18 +217,9 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
     return RecordingUnkownState;
 }
 
-
--(void)testLog:(NSString*)time{
-    
-    NSInteger i = 0;
-    for(i = 0; i < 5; i++){
-        NSLog(@"Recorder timer %@", time);
-    }
-}
-
 #pragma mark PitchTimerCallback
--(void)pitchTimerCallBack:(NSTimer*)timer{
-    
+-(void)pitchTimerCallBack:(NSTimer*)timer
+{
     [self.recorder updateMeters];
     float linear1 = pow (10, [self.recorder averagePowerForChannel:0] / 20);
     
@@ -247,45 +234,43 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
     float seconds = self.recorder.currentTime - (minutes * 60);
     
     NSString *time = [NSString stringWithFormat:@"%0.0f.%0.0f",minutes, seconds];
-    [self testLog:time];
     if(self.recordingProgressBlock)
-        self.recordingProgressBlock(time, pitch);
+        self.recordingProgressBlock(time, self.recorder.currentTime,pitch);
 }
-
 
 #pragma mark audioplayer related functions
 #pragma mark Enable Player Timer
--(void)enablePlayerTimer{
-
+-(void)enablePlayerTimer
+{
     self.playerTimer = [NSTimer scheduledTimerWithTimeInterval: 0.5 target: self selector: @selector(playerTimerCallBack:) userInfo: nil repeats: YES];
 }
 
 #pragma mark InvalidatePlayeranTimer
--(void)invalidatePlayerAndTimer{
-    
+-(void)invalidatePlayerAndTimer
+{
     self.player = nil;
     [self.playerTimer invalidate];
 }
 
 #pragma mark startPlayerAndTimer
--(void)startplayerAndTimer{
-    
+-(void)startplayerAndTimer
+{
     [self.player play];
     self.isPlayerPaused = NO;
     [self enablePlayerTimer];
 }
 
 #pragma mark stopPayerAndInvalidateTimer
--(void)stopPlayerAndInvalidateTimer{
-    
+-(void)stopPlayerAndInvalidateTimer
+{
     self.isPlayerPaused = NO;
     [self.player stop];
     [self invalidatePlayerAndTimer];
 }
 
 #pragma mark getPlayerStatus
--(PlayerStatus)getPlayerStatus{
-    
+-(PlayerStatus)getPlayerStatus
+{
     if(self.player.isPlaying)
         return PlayerStatusPlaying;
 
@@ -300,13 +285,13 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 #pragma mark playerTimerCallback
 -(void)playerTimerCallBack:(NSTimer*)timer{
     
-    if(self.playingProgressBlock){
-
+    if(self.playingProgressBlock)
+    {
         float minutes = floor(self.player.currentTime/60);
         float seconds = self.player.currentTime - (minutes * 60);
         
         NSString *time = [NSString stringWithFormat:@"%0.0f.%0.0f",minutes, seconds];
-        NSLog(@"Playing timer %@", time);
+//        NSLog(@"Playing timer %@", time);
         self.playingProgressBlock((time));
     }
 }
@@ -315,7 +300,6 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 -(BOOL)activateAudioSession{
 
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-    
     NSError *err = nil;
     
     if(![audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error:&err])
@@ -324,7 +308,6 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
         return NO;
     }
     
-
     if(![audioSession setCategory:AVAudioSessionCategoryMultiRoute error:&err])
     {
         NSLog(@"Error: failed to set category for audio session+++ description %@", err.description);
@@ -371,7 +354,7 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
         //Load audio url
         NSURL *url = [NSURL fileURLWithPath:fileName];
         NSError *error;
-        NSLog(@"Playing irl path %@", url);
+
         //create audio player with url
         self.player = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:&error];
         self.player.numberOfLoops = 0;
@@ -389,8 +372,8 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 }
 
 #pragma mark togglePlaying
--(PlayingStatus)togglePlaying{
-    
+-(PlayingStatus)togglePlaying
+{
     if(self.player.isPlaying)
     {
         return  [self pausePlayer];
@@ -405,16 +388,16 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 }
 
 #pragma mark resumePlaying
--(PlayingStatus)resumePlayer{
-
+-(PlayingStatus)resumePlayer
+{
     [self.player play];
     [self enablePlayerTimer];
     return PlayingResumed;
 }
 
 #pragma mark pausePlaying
--(PlayingStatus)pausePlayer{
-    
+-(PlayingStatus)pausePlayer
+{
     [self.player pause];
     self.isPlayerPaused = YES;
     [self.playerTimer invalidate];
@@ -422,9 +405,10 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
 }
 
 #pragma mark setCurrentPlaying time
--(void)setCurrentPlayingTime:(double)secs{
-    
-    if (self.player.isPlaying || self.isPlayerPaused) {
+-(void)setCurrentPlayingTime:(double)secs
+{
+    if (self.player.isPlaying || self.isPlayerPaused)
+    {
         [self.player setCurrentTime:secs];
     }
     else
@@ -440,13 +424,12 @@ NSInteger const AUDIO_QUALITY       = AVAudioQualityMedium;
     self.playingCompletionBlock = nil;
     
     self.recordingProgressBlock = nil;
-
     self.audioPlayerErrorBlock = nil;
 }
 
 #pragma mark stopPlaying
--(PlayingStatus)stopPlaying{
-
+-(PlayingStatus)stopPlaying
+{
     [self.player stop];
     [self invalidatePlayerAndTimer];
     self.isPlayerPaused = NO;

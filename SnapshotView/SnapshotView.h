@@ -16,6 +16,7 @@ typedef void (^ColorSelectedCompletionBlock)();
 
 +(SnapshotView*)sharedHandler;
 
+-(UIView*)getBaseView;
 -(void)removeFromWindow;
 
 -(void)assignBackgroundColorWithImage:(UIImage*)image;
@@ -24,7 +25,6 @@ typedef void (^ColorSelectedCompletionBlock)();
 -(void)removeMovableControlFromSnapView;
 
 -(void)addScribbleControllToSnapView;
--(void)removeScribbleControllFromSnapView;
 
 -(void)addEraseControlToSnapView;
 -(void)removeEraserFromSnapView;

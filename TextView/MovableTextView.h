@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface TextView : UIView <UITextFieldDelegate>
+@interface MovableTextView : UIView <UITextFieldDelegate>
 
 @property(nonatomic, strong) UIColor *textColor;
 

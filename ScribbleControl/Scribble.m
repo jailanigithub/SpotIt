@@ -64,6 +64,7 @@ CGPoint getMidPoint(CGPoint p1, CGPoint p2) {
         self.previousPoint1 = [self getPointAtIndex:self.points.count - 2];
         self.currentPoint = [self getPointAtIndex:self.points.count - 1];
     }
+    
     CGPoint mid1 = getMidPoint(self.previousPoint1, self.previousPoint2);
     CGPoint mid2 = getMidPoint(self.currentPoint,self.previousPoint1);
 	CGMutablePathRef subpath = CGPathCreateMutable();

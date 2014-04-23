@@ -19,7 +19,6 @@
 - (CGRect) addPoint:(CGPoint)point; 
 - (CGPoint) getPointAtIndex:(NSUInteger)index;
 
-- (void) recalculatePath;
 - (NSMutableArray*)getPoints;
 
 @end

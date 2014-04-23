@@ -12,13 +12,6 @@
 #import "FileManager.h"
 #import "ScreenShotControl.h"
 
-NSInteger const SCRIBBLE_BTN_ID         = 100;
-NSInteger const ERASE_BTN_ID            = 200;
-NSInteger const TEXT_BTN_ID             = 300;
-NSInteger const AUDIO_BTN_ID            = 400;
-NSInteger const COLOR_PICKER_BTN_ID     = 500;
-NSInteger const EMAIL_BTN_ID            = 600;
-
 NSString *const SCRIBBLE_UNSELECTED_IMAGE   = @"scribble_unselected.png";
 NSString *const SCRIBBLE_SELECTED_IMAGE     = @"scribble_selected.png";
 
@@ -40,6 +33,19 @@ NSString *const EMAIL_UNSELECTED_IMAGE      = @"email_Unselected.png";
 NSString *const RECORD_IMAGE    = @"record.png";
 NSString *const STOP_IMAGE      = @"stop.png";
 NSString *const PLAY_IMAGE      = @"play.png";
+
+NSInteger const kMaxRecordingTime = 3; //in minutes
+
+enum{
+    SCRIBBLE_BTN_ID         = 100,
+    ERASE_BTN_ID,
+    TEXT_BTN_ID ,
+    AUDIO_BTN_ID,
+    COLOR_PICKER_BTN_ID,
+    EMAIL_BTN_ID
+};
+typedef enum NSInteger MovableControlButtonId;
+
 
 @interface MovableEditorView()
 
@@ -73,7 +79,6 @@ NSString *const PLAY_IMAGE      = @"play.png";
         CGRect frame = [[UIScreen mainScreen] bounds];
         [sharedInstance setFrame:CGRectMake(frame.origin.x, frame.size.height/2, sharedInstance.frame.size.width, sharedInstance.frame.size.height)];
         
-        NSLog(@"Movable editor creaed once");
         [sharedInstance.layer setCornerRadius:5.0];
         [sharedInstance addPanGestureRecognizerToContainerView];
         
@@ -116,8 +121,37 @@ NSString *const PLAY_IMAGE      = @"play.png";
     [self addGestureRecognizer:panGesture];
 }
 
+-(BOOL)isInsideOfFrame:(UIPanGestureRecognizer*)gesture
+{
+    CGPoint translation = [gesture translationInView:self];
+    
+    CGRect gestureFrame = gesture.view.frame;
+    CGRect movableFrame = self.frame;
+    CGRect superFrame   = self.superview.frame;
+    
+    return ((gestureFrame.origin.y + movableFrame.size.height + translation.y >= superFrame.size.height) || (gestureFrame.origin.x + movableFrame.size.width + translation.x >= superFrame.size.width) || (gestureFrame.origin.x + translation.x <= 0) || (gestureFrame.origin.y + translation.y <= 0)) ? NO : YES;
+    
+    if(gestureFrame.origin.x + translation.x <= 0)
+        return NO;
+
+    if(gestureFrame.origin.y + translation.y <= 0)
+        return NO;
+
+    
+    if(gestureFrame.origin.x + movableFrame.size.width + translation.x >= superFrame.size.width)
+        return NO;
+
+    if(gestureFrame.origin.y + movableFrame.size.height + translation.y >= superFrame.size.height)
+        return NO;
+
+    return YES;
+}
+
 -(void)panningContainerView:(UIPanGestureRecognizer*)gesture
 {
+    if(![self isInsideOfFrame:gesture])
+        return;
+    
     CGPoint translation = [gesture translationInView:self.superview];
     gesture.view.center = CGPointMake(gesture.view.center.x + translation.x,
                                       gesture.view.center.y + translation.y);
@@ -128,22 +162,15 @@ NSString *const PLAY_IMAGE      = @"play.png";
 #pragma Save currently selected btn id to maintain state
 -(void)setSelectedBtnId:(NSInteger)selectedBtnId
 {
-    if (self.selectedBtnId == selectedBtnId)
-    {
-        NSLog(@"+++++++++++Try to set same selected btn Id++++++++++");
-        return;
-    }
-    
+
     _selectedBtnId = selectedBtnId;
     
     if(selectedBtnId == AUDIO_BTN_ID)
     {
-        NSLog(@"+++++++++++ No button selected++++++++++");
         [self addNoButtonSelectedView];
     }
     else
     {
-        NSLog(@"++++++++Set selected index other than AUDIO_BTN_ID+++++++++");
         [self stopRecording];
         [self stopPlaying];
         
@@ -151,35 +178,30 @@ NSString *const PLAY_IMAGE      = @"play.png";
         {
             [self addScribbleControllToView];
             [self setScribbleBtnSelectedImage];
-            NSLog(@"+++++++++++Scribble button selected++++++++++");
         }
         
         else if (selectedBtnId == ERASE_BTN_ID)
         {
             [self addEraserToControl];
             [self setEraseBtnSelectedImage];
-            NSLog(@"+++++++++++Erase button selected++++++++++");
         }
         
         else if(selectedBtnId == TEXT_BTN_ID)
         {
             [self addtextViewControl];
             [self setTextBtnSelectedImage];
-            NSLog(@"+++++++++++Text button selected++++++++++");
         }
         
         else if(selectedBtnId == COLOR_PICKER_BTN_ID)
         {
             [self addColorPickerToControl];
-            NSLog(@"+++++++++++Colot picker button selected++++++++++");
         }
         
         else if(selectedBtnId == EMAIL_BTN_ID)
         {
-            NSLog(@"+++++++++++Email button selected++++++++++");
             [self setHidden:YES];
             [[SnapshotView sharedHandler] closeButtonState:YES];
-            UIImage *image = [[ScreenShotControl sharedHandler] getScreenShotImage];
+            UIImage *image = [[ScreenShotControl sharedHandler] takeScreenShotImageForView:[SnapshotView sharedHandler]];
             [[SnapshotView sharedHandler] closeButtonState:NO];
             [self setHidden:NO];
             if(image)
@@ -278,6 +300,13 @@ NSString *const PLAY_IMAGE      = @"play.png";
         self.isRecordedAudioAvailable = NO;
         [self changeAudioButtonImageToStartRecodring];
     }];
+
+    [[AudioManager sharedAudioManager] setRecordingProgressBlock:^(NSString* recordingTime, CGFloat seconds, float pitchLevel){
+        
+        if(seconds > (60 * kMaxRecordingTime))
+            [self audioPressed:self.audioBtn];
+    }];
+
 }
 
 -(void)assignColorSelectedCompletionBlock
@@ -311,7 +340,6 @@ NSString *const PLAY_IMAGE      = @"play.png";
     {
         [[AudioManager sharedAudioManager] stopRecording];
         [self changeAudioButtonImageToStartRecodring];
-        NSLog(@"Stop recording called");
     }
 }
 
@@ -321,20 +349,12 @@ NSString *const PLAY_IMAGE      = @"play.png";
     {
         [[AudioManager sharedAudioManager] stopPlaying];
         [self changeAudioButtonImageToStartRecodring];
-        NSLog(@"Stop playing called");
     }
 }
 
 #pragma mark unselect previously selected image
 -(void)unSelectPreviouslySelectedBtn:(NSInteger)selectedBtnId
 {
-    NSLog(@"previously selected %d", self.previouslySelectedBtnId);
-    NSLog(@"clicked index %d", selectedBtnId);
-    NSLog(@"self.selectedBtnId %d", self.selectedBtnId);
-    
-    if(self.selectedBtnId == selectedBtnId)
-        return;
-    
     switch (self.selectedBtnId)
     {
         case SCRIBBLE_BTN_ID:
@@ -357,6 +377,9 @@ NSString *const PLAY_IMAGE      = @"play.png";
 #pragma Control mark IBAction containers action
 -(IBAction)scribblePressed:(id)sender
 {
+    if(self.selectedBtnId == SCRIBBLE_BTN_ID)
+        return;
+
     [self unSelectPreviouslySelectedBtn:SCRIBBLE_BTN_ID];
     [self setSelectedBtnId:SCRIBBLE_BTN_ID];
 }
@@ -387,9 +410,8 @@ NSString *const PLAY_IMAGE      = @"play.png";
 
 -(IBAction)emailPressed:(id)sender
 {
-    self.previouslySelectedBtnId = self.selectedBtnId;
+    [self unSelectPreviouslySelectedBtn:EMAIL_BTN_ID];
     [self setSelectedBtnId:EMAIL_BTN_ID];
-    [self setSelectedBtnId:self.previouslySelectedBtnId];
 }
 
 #pragma mark audio button fuctionality
@@ -403,7 +425,7 @@ NSString *const PLAY_IMAGE      = @"play.png";
             if([[AudioManager sharedAudioManager] getPlayerStatus] == PlayerStatusIdle)
             {
                 NSString *recentlyRecordedFilePath = [[FileManager sharedFileManager] getRecentlyRecordedAudioFilePath];
-                NSLog(@"recentlyRecordedFilePath %@", recentlyRecordedFilePath);
+
                 if(recentlyRecordedFilePath)
                 {
                     if([[AudioManager sharedAudioManager] startPlaying:recentlyRecordedFilePath] != PlayingStarted)

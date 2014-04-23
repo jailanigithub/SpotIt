@@ -10,8 +10,6 @@
 
 @interface FileManager : NSObject
 
-@property(nonatomic, strong) NSString *recentFilePathForPlaying;
-
 +(FileManager*)sharedFileManager;
 
 //File information and file path
@@ -29,5 +27,6 @@
 -(void)clearAllAudios;
 -(void)clearAllScreenShots;
 
-
+//Roll back recordedx audios
+-(void)rollbackTheRecordedAudios;
 @end

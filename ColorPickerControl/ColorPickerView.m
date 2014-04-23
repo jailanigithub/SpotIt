@@ -20,6 +20,13 @@ typedef void(^RGBCompletionBlcok)(CGFloat rValue,CGFloat gValue,CGFloat bValue,U
 
 @implementation ColorPickerView
 
+#pragma mark - Hide Done button (iPad only)
+
+-(void)hideDoneButton
+{
+    self.doneBtn.hidden = YES;
+}
+
 #pragma mark - Get Selected Color
 
 -(UIColor*)getCurrentSelectedColor
@@ -105,19 +112,15 @@ typedef void(^RGBCompletionBlcok)(CGFloat rValue,CGFloat gValue,CGFloat bValue,U
                                                  bitsPerComponent, bytesPerRow, colorSpace,
                                                  kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
     CGColorSpaceRelease(colorSpace);
-    
     CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
     CGContextRelease(context);
-    
     int byteIndex = (bytesPerRow * yy) + xx * bytesPerPixel;
     CGFloat red   = (rawData[byteIndex]     * 1.0) / 255.0;
     CGFloat green = (rawData[byteIndex + 1] * 1.0) / 255.0;
     CGFloat blue  = (rawData[byteIndex + 2] * 1.0) / 255.0;
     CGFloat alpha = (rawData[byteIndex + 3] * 1.0) / 255.0;
     byteIndex += 4;
-    
     UIColor *acolor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
-    
     free(rawData);
     if (completionBlock)
         completionBlock(red,green,blue,acolor);

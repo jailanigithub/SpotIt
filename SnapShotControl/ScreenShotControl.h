@@ -19,6 +19,6 @@
 -(void)closeButtonFired:(UIButton*)closeBtn;
 
 -(void)sendScreenShotView;
--(UIImage *)getScreenShotImage;
+-(UIImage*)takeScreenShotImageForView:(UIView *)baseView;
 
 @end

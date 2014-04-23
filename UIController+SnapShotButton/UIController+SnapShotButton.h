@@ -11,3 +11,7 @@
 @interface UIViewController (SnapShotButton)
 
 @end
+
+@interface UIView (SnapShotButton)
+
+@end

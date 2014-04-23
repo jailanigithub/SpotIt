@@ -1,0 +1,9 @@
+//
+//  AudioFormatConfig.xcconfig
+//  eMT
+//
+//  Created by aram on 3/26/14.
+//  Copyright (c) 2014 NPCompete. All rights reserved.
+//
+
+GCC_PREPROCESSOR_DEFINITIONS = EncodingFormat=4 ILPC_FORMAT=1 AMR_FORMAT=2 M4A_FORMAT=3 AAC_FORMAT=4

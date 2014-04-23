@@ -8,18 +8,7 @@
 
 #import "ScribCapControl.h"
 
-NSString * const k_NotificationTouchActivityAfterIdle               =@"TouchActivityAfterIdle";
-NSString * const k_NotificationIdleTimeExceeded                     =@"IdleTimeExceeded";
-
-#define kIdleTimeInterval (50)
-
 @interface ScribCapControl ()
-
-@property (nonatomic) BOOL hasPendingIdleCancel;
-@property (nonatomic, strong) NSTimer *idleTimer;
-
-- (void) idleTimerExceeded;
-- (void) resetIdleTimer;
 
 @end
 
@@ -37,33 +26,6 @@ NSString * const k_NotificationIdleTimeExceeded                     =@"IdleTimeE
     });
     return sharedInstance;
 }
-
-#pragma mark - Timer Action
-
-- (void) resetIdleTimer {
-    
-    if (self.hasPendingIdleCancel) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:k_NotificationTouchActivityAfterIdle object:nil];
-        self.hasPendingIdleCancel = NO;
-    }
-    
-    if (self.idleTimer) {
-        [self.idleTimer invalidate];
-        self.idleTimer = nil;
-    }
-    
-    self.idleTimer = [NSTimer scheduledTimerWithTimeInterval:kIdleTimeInterval
-                                                      target:self
-                                                    selector:@selector(idleTimerExceeded)
-                                                    userInfo:nil
-                                                     repeats:NO];
-}
-
-- (void) idleTimerExceeded {
-    [[NSNotificationCenter defaultCenter] postNotificationName:k_NotificationIdleTimeExceeded object:nil];
-    self.hasPendingIdleCancel = YES;
-}
-
 #pragma mark - Pass touch event to View
 
 -(void)sendEvent:(UIEvent*)event withTouch:(UITouch*)touch
@@ -71,7 +33,6 @@ NSString * const k_NotificationIdleTimeExceeded                     =@"IdleTimeE
     NSSet *touches = [event allTouches];
     for (UITouch *aTouch in touches) {
         if ((UITouchPhaseBegan == aTouch.phase) || (UITouchPhaseEnded == aTouch.phase)) {
-            [self resetIdleTimer];
             break;
         }
     }

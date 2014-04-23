@@ -54,7 +54,7 @@ typedef enum PlayingStatus{
 }PlayingStatus;
 
 //Blocks for audio recorder and player
-typedef void (^RecordingProgressBlock) (NSString* recordingTime, float pitchLevel);
+typedef void (^RecordingProgressBlock) (NSString* recordingTime, CGFloat seconds,float pitchLevel);
 typedef void (^PlayingProgressBlock) (NSString* currentPlayinTime);
 typedef void (^PlayingCompletionBlock) ();
 typedef void (^AudioPlayerDecoreErrorBlock) (NSError *decodeError);
