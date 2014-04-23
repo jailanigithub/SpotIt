@@ -4,7 +4,7 @@ Pod::Spec.new do |s|
   # ―――  Spec Metadata  ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 
   s.name         = "SpotIt"
-  s.version      = "0.0.1"
+  s.version      = "v1.0.0"
   s.summary      = "Spot it allows testers to spot their correction in the app and send the mail to developer"
 
   s.homepage     = "https://github.com/jailanigithub/SpotIt"
